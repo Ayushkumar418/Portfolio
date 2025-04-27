@@ -95,3 +95,69 @@ document.querySelector(".contact form").addEventListener("submit", function (eve
             // Optionally, you can provide more user-friendly feedback based on the error
         });
 });
+
+// text animation
+const titles = [
+    "Software Engineer",
+    "Full Stack Developer",
+    "Cybersecurity Professional",
+    "B.Tech Student",
+    "Frontend Developer",
+    "Web Designer",
+    "Web Developer",
+];
+
+let currentIndex = 0;
+const textElement = document.getElementById('dynamic-text');
+
+function animateText(text) {
+    textElement.innerHTML = '';
+    const words = text.split(' ');
+    let letterDelay = 0;
+    
+    words.forEach((word, wordIndex) => {
+        // Add space between words
+        if (wordIndex > 0) {
+            const spaceSpan = document.createElement('span');
+            spaceSpan.innerHTML = '&nbsp;';
+            spaceSpan.style.opacity = '1';
+            spaceSpan.style.width = '0.5em';
+            spaceSpan.style.display = 'inline-block';
+            textElement.appendChild(spaceSpan);
+        }
+        
+        // Animate letters in each word
+        [...word].forEach(letter => {
+            const span = document.createElement('span');
+            span.textContent = letter;
+            span.style.opacity = '0';
+            span.style.display = 'inline-block';
+            textElement.appendChild(span);
+            
+            setTimeout(() => {
+                span.style.animation = 'slideIn 0.3s ease forwards';
+            }, letterDelay);
+            letterDelay += 50;
+        });
+    });
+
+    // Wait and slide out
+    setTimeout(() => {
+        const letters = textElement.querySelectorAll('span:not([style*="width"])');
+        letters.forEach((span, i) => {
+            setTimeout(() => {
+                span.style.animation = 'slideOut 0.3s ease forwards';
+            }, 30 * i);
+        });
+        
+        setTimeout(changeText, letters.length * 30 + 300);
+    }, (text.length * 50) + 1500);
+}
+
+function changeText() {
+    currentIndex = (currentIndex + 1) % titles.length;
+    animateText(titles[currentIndex]);
+}
+
+// Start the animation
+animateText(titles[0]);

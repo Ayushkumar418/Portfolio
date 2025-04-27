@@ -131,38 +131,49 @@ section {
 
 .home-content .text-animate {
     position: relative;
-    width: 32.8rem;
 }
 
 .home-content .text-animate h3 {
     font-size: 3.2rem;
     font-weight: 700;
-    color: transparent;
-    -webkit-text-stroke: .7px var(--main-color);
-    background-image: linear-gradient(var(--main-color), var(--main-color));
-    background-repeat: no-repeat;
-    -webkit-background-clip: text;
-    background-position: -33rem 0;
+    opacity: 1;
+    animation: none !important;
+    background: none;
+    color: var(--main-color);
+    -webkit-text-stroke: 0;
+}
+
+.text-animate h3 span {
+    display: inline-block;
+    opacity: 0;
+    animation-duration: 0.3s;
+    animation-fill-mode: forwards;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slideOut {
+    to {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+}
+
+.home-content .text-animate h3::before {
+    display: none;
 }
 
 .home.show-animate .home-content .text-animate h3 {
     animation: homeBgText 6s linear infinite;
-    animation-delay: 2s;
-}
-
-.home-content .text-animate h3::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 0;
-    height: 100%;
-    border-right: 2px solid var(--main-color);
-    z-index: -1;
-}
-
-.home.show-animate .home-content .text-animate h3::before{
-    animation: homeCursorText 6s linear infinite;
     animation-delay: 2s;
 }
 
@@ -793,6 +804,15 @@ span {
     height: 100%;
     background: var(--bg-color);
     z-index: 98;
+    transition: all 0.3s ease;
+}
+
+#dynamic-text {
+    transition: all 0.5s ease-in-out;
+    display: inline-block;
+    position: relative;
+    margin: 0;
+    padding: 0;
 }
 
 .animate.home-img {
