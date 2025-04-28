@@ -53,9 +53,39 @@ window.onscroll = () => {
   }
 };
 
-// contact send message on gmail
-// Initialize EmailJS with Public Key
-emailjs.init("oAS-cnz0TAfeeISZf"); // Replace with your actual public key
+// Email handling
+(function() {
+    const EMAIL_CONFIG = {
+        publicKey: "oAS-cnz0TAfeeISZf",
+        serviceID: "service_h19uc1r",
+        templateID: "template_n3t070j"
+    };
+
+    function loadEmailJS() {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.emailjs.com/sdk/2.6.4/email.min.js';
+            
+            script.onload = function() {
+                try {
+                    emailjs.init(EMAIL_CONFIG.publicKey);
+                    console.log("EmailJS initialized successfully");
+                    resolve();
+                } catch (error) {
+                    reject(error);
+                }
+            };
+
+            script.onerror = reject;
+            document.body.appendChild(script);
+        });
+    }
+
+    // Initialize EmailJS with async load
+    window.addEventListener('load', () => {
+        loadEmailJS().catch(error => console.error("EmailJS loading failed:", error));
+    });
+})();
 
 // Handle form submission
 document.querySelector(".contact form").addEventListener("submit", async function (event) {
@@ -64,54 +94,68 @@ document.querySelector(".contact form").addEventListener("submit", async functio
     const form = this;
     const submitButton = form.querySelector('button[type="submit"]');
     
-    // Get form field values
-    const fullName = document.querySelector(".contact input[placeholder='Full Name']").value.trim();
-    const email = document.querySelector(".contact input[placeholder='Email Address']").value.trim();
-    const mobileNumber = document.querySelector(".contact input[placeholder='Mobile Number']").value.trim();
-    const emailSubject = document.querySelector(".contact input[placeholder='Email Subject']").value.trim();
-    const message = document.querySelector(".contact textarea").value.trim();
+    // Get and validate form fields
+    const formFields = {
+        fullName: document.querySelector(".contact input[placeholder='Full Name']").value.trim(),
+        email: document.querySelector(".contact input[placeholder='Email Address']").value.trim(),
+        mobileNumber: document.querySelector(".contact input[placeholder='Mobile Number']").value.trim(),
+        emailSubject: document.querySelector(".contact input[placeholder='Email Subject']").value.trim(),
+        message: document.querySelector(".contact textarea").value.trim()
+    };
 
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    if (!emailRegex.test(formFields.email)) {
         alert("Please enter a valid email address.");
         return;
     }
 
-    // Validate form fields
-    if (!fullName || !email || !mobileNumber || !emailSubject || !message) {
+    // Validate all fields are filled
+    if (Object.values(formFields).some(field => !field)) {
         alert("Please fill in all the fields.");
         return;
     }
 
     try {
-        // Disable submit button and show loading state
         submitButton.disabled = true;
-        submitButton.textContent = 'Sending...';
+        submitButton.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Sending...';
 
-        const templateParams = {
-            from_name: fullName,
-            email_id: email,
-            phone: mobileNumber,
-            subject: emailSubject,
-            message: message
-        };
+        // Verify EmailJS is loaded
+        if (typeof emailjs === 'undefined') {
+            throw new Error('EmailJS is not loaded');
+        }
 
-        const response = await emailjs.send("service_h19uc1r", "template_n3t070j", templateParams);
-        
+        const emailPromise = emailjs.send(
+            "service_h19uc1r",
+            "template_n3t070j",
+            {
+                from_name: formFields.fullName, // Used in subject
+                fullName: formFields.fullName,  // Used in content
+                email: formFields.email,
+                mobileNumber: formFields.mobileNumber,
+                emailSubject: formFields.emailSubject,
+                message: formFields.message
+            }
+        ).catch(error => {
+            console.error("Send Error:", error);
+            throw new Error(error.text || 'Failed to send email');
+        });
+
+        const response = await Promise.race([
+            emailPromise,
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), 30000))
+        ]);
+
         if (response.status === 200) {
             alert("Message sent successfully!");
             form.reset();
-        } else {
-            throw new Error('Failed to send message');
         }
     } catch (error) {
         console.error("EmailJS Error:", error);
-        alert("Failed to send message. Please try again later.");
+        alert(error.message || "Failed to send message. Please try again later.");
     } finally {
-        // Re-enable submit button and restore text
         submitButton.disabled = false;
-        submitButton.textContent = 'Send Message';
+        submitButton.textContent = 'Submit';
     }
 });
 
