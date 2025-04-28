@@ -182,23 +182,31 @@ function changeText() {
 animateText(titles[0]);
 
 // Lightbox functionality
-const lightbox = document.getElementById('lightbox');
-const lightboxImg = document.getElementById('lightbox-img');
-const certificateImages = document.querySelectorAll('.certificate-image');
-
-certificateImages.forEach(img => {
-    img.addEventListener('click', () => {
-        lightbox.style.display = 'block';
-        lightboxImg.src = img.src.replace('c2.jpg', 'c.jpg');
+document.addEventListener('DOMContentLoaded', function() {
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightbox-img');
+    const close = document.querySelector('.close');
+    
+    // Get all certificate images
+    const certificateImages = document.querySelectorAll('.certificate-image');
+    
+    // Add click event to each certificate image
+    certificateImages.forEach(img => {
+        img.addEventListener('click', function() {
+            lightbox.style.display = 'flex';
+            lightboxImg.src = this.src;
+        });
     });
-});
-
-document.querySelector('.close').addEventListener('click', () => {
-    lightbox.style.display = 'none';
-});
-
-lightbox.addEventListener('click', (e) => {
-    if (e.target === lightbox) {
+    
+    // Close lightbox when clicking the close button
+    close.addEventListener('click', function() {
         lightbox.style.display = 'none';
-    }
+    });
+    
+    // Close lightbox when clicking outside the image
+    lightbox.addEventListener('click', function(e) {
+        if (e.target === lightbox) {
+            lightbox.style.display = 'none';
+        }
+    });
 });
