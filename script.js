@@ -153,11 +153,175 @@ document.addEventListener('DOMContentLoaded', function() {
     if (contactForm) {
         contactForm.addEventListener('submit', sendEmail);
     }
+
+    // Real-time validation
+    const debounce = (func, wait) => {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    };
+
+    const inputs = {
+        name: {
+            element: document.getElementById('name'),
+            validate: (value) => value.trim().length >= 2 || 'Name must be at least 2 characters'
+        },
+        email: {
+            element: document.getElementById('email'),
+            validate: (value) => {
+                if (!value) return 'Email is required';
+                return validateEmail(value) || 'Please enter a valid email address';
+            }
+        },
+        number: {
+            element: document.getElementById('number'),
+            validate: (value) => {
+                if (!value) return 'Phone number is required';
+                return validatePhone(value) || 'Please enter a valid 10-digit number';
+            }
+        },
+        subject: {
+            element: document.getElementById('subject'),
+            validate: (value) => value.trim().length >= 3 || 'Subject must be at least 3 characters'
+        },
+        message: {
+            element: document.getElementById('Message'),
+            validate: (value) => value.trim().length >= 10 || 'Message must be at least 10 characters'
+        }
+    };
+
+    // Add real-time validation with debounce
+    Object.keys(inputs).forEach(key => {
+        const input = inputs[key];
+        const validateWithDebounce = debounce((element) => {
+            const result = input.validate(element.value);
+            if (result === true) {
+                removeError(element);
+                element.classList.add('valid');
+            } else {
+                showError(element, result);
+                element.classList.remove('valid');
+            }
+        }, 500); // 500ms debounce delay
+
+        input.element.addEventListener('input', function() {
+            validateWithDebounce(this);
+        });
+
+        // Validate on blur immediately
+        input.element.addEventListener('blur', function() {
+            const result = input.validate(this.value);
+            if (result === true) {
+                removeError(this);
+                this.classList.add('valid');
+            } else {
+                showError(this, result);
+                this.classList.remove('valid');
+            }
+        });
+    });
 });
 
-// Update sendEmail to be used as a form submit handler
+// Form validation functions
+function showError(input, message) {
+  const formControl = input.parentElement;
+  const errorDiv = formControl.querySelector('.error-message') || document.createElement('div');
+  errorDiv.className = 'error-message';
+  errorDiv.innerText = message;
+  if (!formControl.querySelector('.error-message')) {
+    formControl.appendChild(errorDiv);
+  }
+  input.classList.add('error');
+}
+
+function removeError(input) {
+  const formControl = input.parentElement;
+  const errorDiv = formControl.querySelector('.error-message');
+  if (errorDiv) {
+    formControl.removeChild(errorDiv);
+  }
+  input.classList.remove('error');
+}
+
+function validateEmail(email) {
+    // More comprehensive email validation
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    const isValid = emailRegex.test(email);
+    return isValid;
+}
+
+function validatePhone(phone) {
+    // Allow only numbers and exact length of 10
+    const phoneRegex = /^\d{10}$/;
+    const isValid = phoneRegex.test(phone.replace(/\D/g, ''));
+    return isValid;
+}
+
+function validateForm() {
+  let isValid = true;
+  const name = document.getElementById('name');
+  const email = document.getElementById('email');
+  const number = document.getElementById('number');
+  const subject = document.getElementById('subject');
+  const message = document.getElementById('Message');
+
+  // Name validation
+  if (name.value.trim().length < 2) {
+    showError(name, 'Name must be at least 2 characters');
+    isValid = false;
+  } else {
+    removeError(name);
+  }
+
+  // Email validation
+  if (!validateEmail(email.value)) {
+    showError(email, 'Please enter a valid email address');
+    isValid = false;
+  } else {
+    removeError(email);
+  }
+
+  // Phone validation
+  if (!validatePhone(number.value)) {
+    showError(number, 'Please enter a valid 10-digit phone number');
+    isValid = false;
+  } else {
+    removeError(number);
+  }
+
+  // Subject validation
+  if (subject.value.trim().length < 3) {
+    showError(subject, 'Subject must be at least 3 characters');
+    isValid = false;
+  } else {
+    removeError(subject);
+  }
+
+  // Message validation
+  if (message.value.trim().length < 10) {
+    showError(message, 'Message must be at least 10 characters');
+    isValid = false;
+  } else {
+    removeError(message);
+  }
+
+  return isValid;
+}
+
+// Update sendEmail function
 function sendEmail(event) {
   if (event) event.preventDefault();
+
+  // Validate form before sending
+  if (!validateForm()) {
+    return; // Stop if validation fails
+  }
 
   const submitBtn = document.getElementById("submit");
   const originalText = submitBtn.textContent;
@@ -167,11 +331,11 @@ function sendEmail(event) {
   submitBtn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Sending...";
 
   var params = {
-    name: document.getElementById("name").value,
-    email: document.getElementById("email").value,
-    number: document.getElementById("number").value,
-    subject: document.getElementById("subject").value,
-    message: document.getElementById("Message").value,
+    name: document.getElementById("name").value.trim(),
+    email: document.getElementById("email").value.trim(),
+    number: document.getElementById("number").value.trim(),
+    subject: document.getElementById("subject").value.trim(),
+    message: document.getElementById("Message").value.trim(),
   };
 
   const serviceID = "service_5h6hpmr";

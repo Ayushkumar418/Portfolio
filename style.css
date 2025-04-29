@@ -807,6 +807,70 @@ span {
   cursor: pointer;
 }
 
+.input-field,
+.textarea-field {
+  position: relative;
+  min-height: 7rem; /* Increased height to accommodate error message */
+  margin-bottom: 1rem;
+}
+
+.input-field input.error,
+.textarea-field textarea.error {
+  border-color: #ff4444;
+  animation: shake 0.5s ease-in-out;
+}
+
+.input-field input.valid,
+.textarea-field textarea.valid {
+  border-color: #00ff00;
+}
+
+.error-message {
+  position: absolute;
+  bottom: -2.2rem;
+  left: 0;
+  color: #ff4444;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transform: translateY(-10px);
+  animation: slideDown 0.3s forwards;
+  background: rgba(8, 27, 41, 0.95); /* Semi-transparent dark background */
+  padding: 0.3rem 0.8rem;
+  border-radius: 0.4rem;
+  z-index: 2;
+}
+
+.error-message::before {
+  content: '⚠';
+  margin-right: 0.5rem;
+  font-size: 1.4rem;
+}
+
+@keyframes slideDown {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-10px); }
+  75% { transform: translateX(10px); }
+}
+
+.input-field input,
+.textarea-field textarea {
+  transition: all 0.3s ease;
+}
+
+.input-field input:focus,
+.textarea-field textarea:focus {
+  box-shadow: 0 0 10px rgba(0, 171, 240, 0.3);
+}
+
 .footer {
   display: flex;
   justify-content: space-between;
