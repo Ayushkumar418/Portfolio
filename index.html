@@ -10,7 +10,16 @@
 
     <!-- box icons -->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <script type="text/javascript" src="https://cdn.emailjs.com/dist/email.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js">
+    </script>
+    <script type="text/javascript">
+        (function () {
+            emailjs.init({
+                publicKey: "pcByD4ywxz6qJrLoa",
+            });
+        })();
+    </script>
+
 </head>
 
 <body>
@@ -104,28 +113,35 @@
                 <div class="education-box">
                     <div class="education-content">
                         <div class="content">
-                            <div class="year"><i class='bx bxs-calendar'></i> 2020 -2021 </div>
-                            <h3>10th degree - Schoole</h3>
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi nihil pariatur maxime,
-                                autem mollitia vel obcaecati sapiente esse adipisci non?</p>
+                            <div class="year"><i class='bx bxs-calendar'></i> 2020 – 2021 </div>
+                            <h3>Secondary School</h3>
+                            <p>
+                                Completed Class 10th from Utkramit Madhyamik School, Pakwaliya Draunda, Siwan under the
+                                BSBE Board.<br>
+                                Secured First Division with 83.6% marks.
+                            </p>
                         </div>
                     </div>
 
                     <div class="education-content">
                         <div class="content">
-                            <div class="year"><i class='bx bxs-calendar'></i> 2021 -2023 </div>
-                            <h3>12th degree - Schoole</h3>
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi nihil pariatur maxime,
-                                autem mollitia vel obcaecati sapiente esse adipisci non?</p>
+                            <div class="year"><i class='bx bxs-calendar'></i> 2021 – 2023 </div>
+                            <h3>Intermediate School</h3>
+                            <p>
+                                Completed Class 12th from RBGR College, Maharajganj, Siwan under the BSBE Board.<br>
+                                Secured First Division with 71.2% marks.
+                            </p>
                         </div>
                     </div>
 
                     <div class="education-content">
                         <div class="content">
-                            <div class="year"><i class='bx bxs-calendar'></i> 2023 -Still </div>
-                            <h3>B.Tech(CSE) - University</h3>
-                            <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi nihil pariatur maxime,
-                                autem mollitia vel obcaecati sapiente esse adipisci non?</p>
+                            <div class="year"><i class='bx bxs-calendar'></i> 2023 – Present </div>
+                            <h3>Bachelor of Technology</h3>
+                            <p>
+                                Currently pursuing B.Tech in Computer Science and Engineering from Shobhit Institute of
+                                Engineering & Technology, Meerut.
+                            </p>
                         </div>
                     </div>
 
@@ -149,7 +165,8 @@
                         <div class="content">
                             <div class="year"><i class='bx bxs-calendar'></i> October 2024</div>
                             <h3>Hackstreet</h3>
-                            <p>Participation awarded for reaching the Grand Finale of Hackstreet, showcasing exceptional problem- solving skills and exemplary teamwork throughout the 24-hour hackathon</p>
+                            <p>Participation awarded for reaching the Grand Finale of Hackstreet, showcasing exceptional
+                                problem- solving skills and exemplary teamwork throughout the 24-hour hackathon</p>
                         </div>
                     </div>
 
@@ -157,7 +174,8 @@
                         <div class="content">
                             <div class="year"><i class='bx bxs-calendar'></i>2024-Onward</div>
                             <h3>Web Developer</h3>
-                            <p>Diving deep into the world of Web Development — crafting clean designs, responsive layouts, and cool user experiences. Constantly learning, building, and leveling up!</p>
+                            <p>Diving deep into the world of Web Development — crafting clean designs, responsive
+                                layouts, and cool user experiences. Constantly learning, building, and leveling up!</p>
                         </div>
                     </div>
 
@@ -273,11 +291,11 @@
         <form action="#">
             <div class="input-box">
                 <div class="input-field">
-                    <input type="text" placeholder="Full Name" required>
+                    <input id="name" type="text" placeholder="Full Name" required>
                     <span class="focus"></span>
                 </div>
                 <div class="input-field">
-                    <input type="text" placeholder="Email Address" required>
+                    <input id="email" type="email" placeholder="Email Address" required>
                     <span class="focus"></span>
                 </div>
 
@@ -286,26 +304,25 @@
 
             <div class="input-box">
                 <div class="input-field">
-                    <input type="number" placeholder="Mobile Number" required>
+                    <input id="number" type="number" placeholder="Mobile Number" required>
                     <span class="focus"></span>
                 </div>
                 <div class="input-field">
-                    <input type="text" placeholder="Email Subject" required>
-                    <span class="focus"></span>
+                        <input id="subject" type="text" placeholder="Email Subject" required>                  <span class="focus"></span>
                 </div>
 
                 <span class="animate scroll" style="--i:5;"></span>
             </div>
 
             <div class="textarea-field">
-                <textarea type="text" name="" id="" cols="30" rows="10" placeholder="Your Message" required></textarea>
+                <textarea id="Message" type="text" name="" cols="30" rows="10" placeholder="Your Message" required></textarea>
                 <span class="focus"></span>
 
                 <span class="animate scroll" style="--i:7;"></span>
             </div>
 
             <div class="btn-box btns">
-                <button type="submit" class="btn">Submit</button>
+                <button id="submit" type="submit" class="btn">Submit</button>
 
                 <span class="animate scroll" style="--i:9;"></span>
             </div>

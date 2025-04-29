@@ -53,112 +53,6 @@ window.onscroll = () => {
   }
 };
 
-// Email handling
-(function() {
-    const EMAIL_CONFIG = {
-        publicKey: "oAS-cnz0TAfeeISZf",
-        serviceID: "service_h19uc1r",
-        templateID: "template_n3t070j"
-    };
-
-    function loadEmailJS() {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.emailjs.com/sdk/2.6.4/email.min.js';
-            
-            script.onload = function() {
-                try {
-                    emailjs.init(EMAIL_CONFIG.publicKey);
-                    console.log("EmailJS initialized successfully");
-                    resolve();
-                } catch (error) {
-                    reject(error);
-                }
-            };
-
-            script.onerror = reject;
-            document.body.appendChild(script);
-        });
-    }
-
-    // Initialize EmailJS with async load
-    window.addEventListener('load', () => {
-        loadEmailJS().catch(error => console.error("EmailJS loading failed:", error));
-    });
-})();
-
-// Handle form submission
-document.querySelector(".contact form").addEventListener("submit", async function (event) {
-    event.preventDefault();
-
-    const form = this;
-    const submitButton = form.querySelector('button[type="submit"]');
-    
-    // Get and validate form fields
-    const formFields = {
-        fullName: document.querySelector(".contact input[placeholder='Full Name']").value.trim(),
-        email: document.querySelector(".contact input[placeholder='Email Address']").value.trim(),
-        mobileNumber: document.querySelector(".contact input[placeholder='Mobile Number']").value.trim(),
-        emailSubject: document.querySelector(".contact input[placeholder='Email Subject']").value.trim(),
-        message: document.querySelector(".contact textarea").value.trim()
-    };
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formFields.email)) {
-        alert("Please enter a valid email address.");
-        return;
-    }
-
-    // Validate all fields are filled
-    if (Object.values(formFields).some(field => !field)) {
-        alert("Please fill in all the fields.");
-        return;
-    }
-
-    try {
-        submitButton.disabled = true;
-        submitButton.innerHTML = '<i class="bx bx-loader-alt bx-spin"></i> Sending...';
-
-        // Verify EmailJS is loaded
-        if (typeof emailjs === 'undefined') {
-            throw new Error('EmailJS is not loaded');
-        }
-
-        const emailPromise = emailjs.send(
-            "service_h19uc1r",
-            "template_n3t070j",
-            {
-                from_name: formFields.fullName, // Used in subject
-                fullName: formFields.fullName,  // Used in content
-                email: formFields.email,
-                mobileNumber: formFields.mobileNumber,
-                emailSubject: formFields.emailSubject,
-                message: formFields.message
-            }
-        ).catch(error => {
-            console.error("Send Error:", error);
-            throw new Error(error.text || 'Failed to send email');
-        });
-
-        const response = await Promise.race([
-            emailPromise,
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), 30000))
-        ]);
-
-        if (response.status === 200) {
-            alert("Message sent successfully!");
-            form.reset();
-        }
-    } catch (error) {
-        console.error("EmailJS Error:", error);
-        alert(error.message || "Failed to send message. Please try again later.");
-    } finally {
-        submitButton.disabled = false;
-        submitButton.textContent = 'Submit';
-    }
-});
-
 // text animation
 const titles = [
   "B.Tech(CSE) Student",
@@ -253,4 +147,55 @@ document.addEventListener('DOMContentLoaded', function() {
             lightbox.style.display = 'none';
         }
     });
+
+    // Attach sendEmail to the form's submit event
+    const contactForm = document.querySelector('section.contact form');
+    if (contactForm) {
+        contactForm.addEventListener('submit', sendEmail);
+    }
 });
+
+// Update sendEmail to be used as a form submit handler
+function sendEmail(event) {
+  if (event) event.preventDefault();
+
+  const submitBtn = document.getElementById("submit");
+  const originalText = submitBtn.textContent;
+  
+  // Disable button and show loading state
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Sending...";
+
+  var params = {
+    name: document.getElementById("name").value,
+    email: document.getElementById("email").value,
+    number: document.getElementById("number").value,
+    subject: document.getElementById("subject").value,
+    message: document.getElementById("Message").value,
+  };
+
+  const serviceID = "service_5h6hpmr";
+  const templateID = "template_b3y89oe";
+
+  emailjs.send(serviceID, templateID, params)
+    .then((res) => {
+      // Clear all fields
+      document.getElementById("name").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("number").value = "";
+      document.getElementById("subject").value = "";
+      document.getElementById("Message").value = "";
+      console.log(res);
+      alert("Your message has been sent successfully!");
+    })
+    .catch((err) => {
+      console.log(err);
+      alert("Failed to send message. Please try again later.");
+    })
+    .finally(() => {
+      // Reset button state
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+      submitBtn.classList.remove("sending");
+    });
+}

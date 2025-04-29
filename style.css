@@ -262,6 +262,12 @@ section {
   width: 100%;
 }
 
+@keyframes loading {
+  100% {
+    left: 100%;
+  }
+}
+
 .home-sci {
   position: absolute;
   bottom: 4rem;
