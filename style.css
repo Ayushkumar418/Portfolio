@@ -810,7 +810,6 @@ span {
 .input-field,
 .textarea-field {
   position: relative;
-  min-height: 7rem; /* Increased height to accommodate error message */
   margin-bottom: 1rem;
 }
 
