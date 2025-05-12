@@ -314,52 +314,70 @@ function validateForm() {
   return isValid;
 }
 
-// Update sendEmail function
+function showPopup(type, title, message) {
+    // Create popup element
+    const popup = document.createElement('div');
+    popup.className = `popup ${type}`;
+    popup.innerHTML = `
+        <i class='bx ${type === 'success' ? 'bxs-check-circle' : 'bxs-x-circle'}'></i>
+        <h2>${title}</h2>
+        <p>${message}</p>
+        <button onclick="this.parentElement.remove()">OK</button>
+    `;
+    document.body.appendChild(popup);
+    
+    // Show popup with animation
+    setTimeout(() => popup.classList.add('show'), 10);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        popup.classList.remove('show');
+        setTimeout(() => popup.remove(), 300);
+    }, 5000);
+}
+
 function sendEmail(event) {
-  if (event) event.preventDefault();
+    if (event) event.preventDefault();
 
-  // Validate form before sending
-  if (!validateForm()) {
-    return; // Stop if validation fails
-  }
+    // Validate form before sending
+    if (!validateForm()) {
+        return;
+    }
 
-  const submitBtn = document.getElementById("submit");
-  const originalText = submitBtn.textContent;
-  
-  // Disable button and show loading state
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Sending...";
+    const submitBtn = document.getElementById("submit");
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Sending...";
 
-  var params = {
-    name: document.getElementById("name").value.trim(),
-    email: document.getElementById("email").value.trim(),
-    number: document.getElementById("number").value.trim(),
-    subject: document.getElementById("subject").value.trim(),
-    message: document.getElementById("Message").value.trim(),
-  };
+    var params = {
+        name: document.getElementById("name").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        number: document.getElementById("number").value.trim(),
+        subject: document.getElementById("subject").value.trim(),
+        message: document.getElementById("Message").value.trim(),
+    };
 
-  const serviceID = "service_5h6hpmr";
-  const templateID = "template_b3y89oe";
+    const serviceID = "service_5h6hpmr";
+    const templateID = "template_b3y89oe";
 
-  emailjs.send(serviceID, templateID, params)
-    .then((res) => {
-      // Clear all fields
-      document.getElementById("name").value = "";
-      document.getElementById("email").value = "";
-      document.getElementById("number").value = "";
-      document.getElementById("subject").value = "";
-      document.getElementById("Message").value = "";
-      console.log(res);
-      alert("Your message has been sent successfully!");
-    })
-    .catch((err) => {
-      console.log(err);
-      alert("Failed to send message. Please try again later.");
-    })
-    .finally(() => {
-      // Reset button state
-      submitBtn.disabled = false;
-      submitBtn.textContent = originalText;
-      submitBtn.classList.remove("sending");
-    });
+    emailjs.send(serviceID, templateID, params)
+        .then((res) => {
+            // Clear all fields
+            document.getElementById("name").value = "";
+            document.getElementById("email").value = "";
+            document.getElementById("number").value = "";
+            document.getElementById("subject").value = "";
+            document.getElementById("Message").value = "";
+            showPopup('success', 'Success!', 'Your message has been sent successfully!');
+        })
+        .catch((err) => {
+            console.log(err);
+            showPopup('error', 'Error!', 'Failed to send message. Please try again later.');
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = originalText;
+            submitBtn.classList.remove("sending");
+        });
 }
