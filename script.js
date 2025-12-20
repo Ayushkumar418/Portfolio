@@ -119,8 +119,23 @@ function changeText() {
 // Start the animation
 animateText(titles[0]);
 
-// GitHub Projects Integration - Fetches PINNED repositories
+// GitHub Projects Integration
+// ========================================
+// Just add your repository names to this array!
+// The script will fetch details from GitHub API automatically.
+// ========================================
+
 const GITHUB_USERNAME = 'Ayushkumar418';
+
+// ADD YOUR PROJECT REPOSITORY NAMES HERE
+const MY_PROJECTS = [
+  'OS_SIMULATOR-Web_App',
+  'SecBootKIVS',
+  'Hostel-Management-System',
+  'Student_Performance_Predictor',
+  'VotingSystem',
+  'student-data-manager'
+];
 
 // Language to icon mapping
 const languageIcons = {
@@ -162,6 +177,15 @@ function getProjectIcon(repo) {
   if (name.includes('todo') || name.includes('task')) return 'bx-task';
   if (name.includes('dashboard') || name.includes('admin')) return 'bx-grid-alt';
   if (name.includes('simulator') || name.includes('os')) return 'bx-chip';
+  if (name.includes('hostel') || name.includes('management')) return 'bx-building-house';
+  if (name.includes('voting') || name.includes('vote')) return 'bx-check-square';
+  if (name.includes('student') || name.includes('predictor')) return 'bx-line-chart';
+  if (name.includes('boot') || name.includes('secure')) return 'bx-shield';
+  if (name.includes('data') || name.includes('science')) return 'bx-data';
+  if (name.includes('os') || name.includes('simulator')) return 'bx-chip';
+  if (name.includes('codsoft')) return 'bx-code';
+  if (name.includes('hostel') || name.includes('management')) return 'bx-building-house';
+  
 
   // Fallback to language icon
   const langIcon = languageIcons[repo.language] || languageIcons['default'];
@@ -176,89 +200,55 @@ function createProjectCard(repo) {
   const langClass = getLanguageClass(repo.language);
 
   return `
-        <div class="project-card">
-            <div class="project-header">
-                <i class='bx ${icon} project-icon'></i>
-                <div class="project-links">
-                    ${repo.homepage ? `<a href="${repo.homepage}" target="_blank" title="Live Demo"><i class='bx bx-link-external'></i></a>` : ''}
-                    <a href="${repo.html_url}" target="_blank" title="View Code"><i class='bx bxl-github'></i></a>
-                </div>
-            </div>
-            <h3 class="project-title">${repo.name.replace(/-|_/g, ' ')}</h3>
-            <p class="project-description">${description}</p>
-            <div class="project-tech">
-                <span>${language}</span>
-                ${repo.topics && repo.topics.length > 0 ? repo.topics.slice(0, 3).map(topic => `<span>${topic}</span>`).join('') : ''}
-            </div>
-            <div class="project-stats">
-                <span class="stars"><i class='bx bxs-star'></i> ${repo.stargazers_count}</span>
-                <span class="forks"><i class='bx bx-git-repo-forked'></i> ${repo.forks_count}</span>
-                <span class="language"><span class="language-dot ${langClass}"></span> ${language}</span>
-            </div>
+    <div class="project-card">
+      <div class="project-header">
+        <i class='bx ${icon} project-icon'></i>
+        <div class="project-links">
+          ${repo.homepage ? `<a href="${repo.homepage}" target="_blank" title="Live Demo"><i class='bx bx-link-external'></i></a>` : ''}
+          <a href="${repo.html_url}" target="_blank" title="View Code"><i class='bx bxl-github'></i></a>
         </div>
-    `;
+      </div>
+      <h3 class="project-title">${repo.name.replace(/-|_/g, ' ')}</h3>
+      <p class="project-description">${description}</p>
+      <div class="project-tech">
+        <span>${language}</span>
+        ${repo.topics && repo.topics.length > 0 ? repo.topics.slice(0, 3).map(topic => `<span>${topic}</span>`).join('') : ''}
+      </div>
+      <div class="project-stats">
+        <span class="stars"><i class='bx bxs-star'></i> ${repo.stargazers_count}</span>
+        <span class="forks"><i class='bx bx-git-repo-forked'></i> ${repo.forks_count}</span>
+        <span class="language"><span class="language-dot ${langClass}"></span> ${language}</span>
+      </div>
+    </div>
+  `;
 }
 
-// Fetch pinned repositories using GitHub GraphQL API via public proxy
-async function fetchPinnedRepos() {
-  // List of your preferred/pinned repos - UPDATE THIS LIST to match your GitHub pins!
-  const PREFERRED_REPOS = [
-    'Hostel-Management-System',
-    'OS_SIMULATOR-Web_App',
-    'SecBootKIVS',
-    'Student_Performance_Predictor',
-    'VotingSystem',
-    'student-data-manager'
-  ];
-
-  // Fetch all repos and filter to get the preferred ones
-  const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100`, {
+// Fetch a single repository's details from GitHub API
+async function fetchRepoDetails(repoName) {
+  const response = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${repoName}`, {
     headers: {
       'Accept': 'application/vnd.github.mercy-preview+json'
     }
   });
 
   if (!response.ok) {
-    throw new Error('Failed to fetch repositories');
+    console.warn(`Failed to fetch repo: ${repoName}`);
+    return null;
   }
 
-  const allRepos = await response.json();
-
-  // Filter to only include preferred repos, maintaining the order from PREFERRED_REPOS
-  const pinnedRepos = PREFERRED_REPOS
-    .map(repoName => allRepos.find(repo => repo.name === repoName))
-    .filter(repo => repo !== undefined);
-
-  return pinnedRepos;
+  return await response.json();
 }
 
-// Fallback: Fetch regular repos if pinned repos fail
-async function fetchRegularRepos() {
-  const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos`, {
-    headers: {
-      'Accept': 'application/vnd.github.mercy-preview+json'
-    }
-  });
+// Fetch all projects from the MY_PROJECTS array
+async function fetchMyProjects() {
+  const fetchPromises = MY_PROJECTS.map(repoName => fetchRepoDetails(repoName));
+  const results = await Promise.all(fetchPromises);
 
-  if (!response.ok) {
-    throw new Error('Failed to fetch repositories');
-  }
-
-  const repos = await response.json();
-
-  // Sort by stars and updated date, filter out forks
-  return repos
-    .filter(repo => !repo.fork)
-    .sort((a, b) => {
-      if (b.stargazers_count !== a.stargazers_count) {
-        return b.stargazers_count - a.stargazers_count;
-      }
-      return new Date(b.updated_at) - new Date(a.updated_at);
-    })
-    .slice(0, 6);
+  // Filter out any failed fetches (null values)
+  return results.filter(repo => repo !== null);
 }
 
-// Load GitHub projects (prioritize pinned repos)
+// Load GitHub projects
 async function loadGitHubProjects() {
   const loadingEl = document.getElementById('projects-loading');
   const gridEl = document.getElementById('projects-grid');
@@ -270,33 +260,17 @@ async function loadGitHubProjects() {
   errorEl.style.display = 'none';
 
   try {
-    let repos;
-
-    // Try to fetch pinned repos first
-    try {
-      repos = await fetchPinnedRepos();
-      console.log('Loaded pinned repositories:', repos.length);
-
-      // If no pinned repos, fall back to regular repos
-      if (repos.length === 0) {
-        console.log('No pinned repos found, falling back to regular repos');
-        repos = await fetchRegularRepos();
-        console.log('Loaded regular repositories:', repos.length);
-      }
-    } catch (pinnedError) {
-      console.warn('Failed to fetch pinned repos, falling back to regular repos:', pinnedError);
-      repos = await fetchRegularRepos();
-      console.log('Loaded regular repositories:', repos.length);
-    }
+    const repos = await fetchMyProjects();
+    console.log('Loaded projects:', repos.length);
 
     // Hide loading
     loadingEl.style.display = 'none';
 
     if (repos.length === 0) {
       errorEl.innerHTML = `
-                <i class='bx bx-folder-open'></i>
-                <p>No projects found.</p>
-            `;
+        <i class='bx bx-folder-open'></i>
+        <p>No projects found.</p>
+      `;
       errorEl.style.display = 'flex';
       return;
     }

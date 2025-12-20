@@ -891,6 +891,7 @@ span {
 .certificates {
   min-height: auto;
   padding-bottom: 7rem;
+  background: var(--second-bg-color);
 }
 
 .certificates h2 {
@@ -993,7 +994,7 @@ span {
 .contact {
   min-height: auto;
   padding-bottom: 7rem;
-  background: var(--second-bg-color);
+  background: var(--bg-color);
 }
 
 .contact h2 {
@@ -1212,7 +1213,7 @@ span {
   align-items: center;
   flex-wrap: wrap;
   padding: 2rem 9%;
-  background: var(--bg-color);
+  background: var(--second-bg-color);
 }
 
 .footer-text,
