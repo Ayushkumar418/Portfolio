@@ -174,6 +174,7 @@ section {
     opacity: 0;
     transform: translateX(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -787,10 +788,10 @@ span {
   transition: 0.5s;
 }
 
-.contact form .input-box .input-field input:focus ~ .focus,
-.contact form .input-box .input-field input:valid ~ .focus,
-.contact form .textarea-field textarea:focus ~ .focus,
-.contact form .textarea-field textarea:valid ~ .focus {
+.contact form .input-box .input-field input:focus~.focus,
+.contact form .input-box .input-field input:valid~.focus,
+.contact form .textarea-field textarea:focus~.focus,
+.contact form .textarea-field textarea:valid~.focus {
   width: 100%;
 }
 
@@ -835,7 +836,8 @@ span {
   opacity: 0;
   transform: translateY(-10px);
   animation: slideDown 0.3s forwards;
-  background: rgba(8, 27, 41, 0.95); /* Semi-transparent dark background */
+  background: rgba(8, 27, 41, 0.95);
+  /* Semi-transparent dark background */
   padding: 0.3rem 0.8rem;
   border-radius: 0.4rem;
   z-index: 2;
@@ -855,9 +857,19 @@ span {
 }
 
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-10px); }
-  75% { transform: translateX(10px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-10px);
+  }
+
+  75% {
+    transform: translateX(10px);
+  }
 }
 
 .input-field input,
@@ -1019,39 +1031,12 @@ span {
   animation-delay: calc(0.3s * var(--i));
 }
 
-.animate.scroll {
-  transition: 1s ease;
-  animation-delay: calc(0.3s / var(--i));
-  animation: none;
-}
-
-section:nth-child(odd) .animate.scroll {
-  background: var(--second-bg-color);
-}
-
-footer .animate.scroll {
-  background: var(--bg-color);
-}
-
-.education .education-box .animate.scroll {
-  width: 105%;
-}
-
-.about.show-animate .animate.scroll,
-.education.show-animate .animate.scroll,
-.skills.show-animate .animate.scroll,
-.certificates.show-animate .animate.scroll,
-.contact.show-animate .animate.scroll,
-.footer.show-animate .animate.scroll {
-  animation-delay: calc(0.3s * var(--i));
-  width: 0;
-}
-
 /* BREAKPOINTS */
 
 @media (max-width: 1385px) {
   html {
-    font-size: 60.5%; /* Increased from 55% */
+    font-size: 60.5%;
+    /* Increased from 55% */
   }
 
   .certificates-row .certificate-box .certificate-img:hover {
@@ -1184,7 +1169,8 @@ footer .animate.scroll {
 
 @media (max-width: 520px) {
   html {
-    font-size: 55%; /* Increased from 50% */
+    font-size: 55%;
+    /* Increased from 50% */
   }
 
   .home-content h1 {
@@ -1272,7 +1258,7 @@ footer .animate.scroll {
     margin: -2rem;
   }
 
-    .close {
+  .close {
     top: 13rem;
     right: 3rem;
   }
@@ -1321,11 +1307,13 @@ footer .animate.scroll {
 
 /* KEYFRAMES ANIMATION */
 @keyframes homeBgText {
+
   0%,
   10%,
   100% {
     background-position: -33rem 0;
   }
+
   65%,
   85% {
     background-position: -0 0;
@@ -1333,17 +1321,20 @@ footer .animate.scroll {
 }
 
 @keyframes homeCursorText {
+
   0%,
   10%,
   100% {
     width: 0;
   }
+
   65%,
   75%,
   85% {
     width: 100%;
     opacity: 1;
   }
+
   75%,
   81% {
     opacity: 0;
