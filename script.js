@@ -137,6 +137,71 @@ const MY_PROJECTS = [
   'student-data-manager'
 ];
 
+// FALLBACK DATA - Used when GitHub API is rate limited
+// Update this with your actual project info
+const FALLBACK_PROJECTS = [
+  {
+    name: 'OS_SIMULATOR-Web_App',
+    description: 'An interactive web-based Operating System simulator for learning OS concepts like process scheduling, memory management, and file systems.',
+    language: 'JavaScript',
+    html_url: 'https://github.com/Ayushkumar418/OS_SIMULATOR-Web_App',
+    homepage: 'https://ayushkumar418.github.io/OS_SIMULATOR-Web_App/',
+    stargazers_count: 0,
+    forks_count: 0,
+    topics: ['os', 'simulator', 'web-app']
+  },
+  {
+    name: 'SecBootKIVS',
+    description: 'Secure Boot Kernel Integrity Verification System - A security-focused project for boot process integrity.',
+    language: 'Shell',
+    html_url: 'https://github.com/Ayushkumar418/SecBootKIVS',
+    homepage: '',
+    stargazers_count: 0,
+    forks_count: 0,
+    topics: ['security', 'boot', 'linux']
+  },
+  {
+    name: 'Hostel-Management-System',
+    description: 'A comprehensive hostel management system for managing student accommodations, room allocations, and hostel operations.',
+    language: 'JavaScript',
+    html_url: 'https://github.com/Ayushkumar418/Hostel-Management-System',
+    homepage: '',
+    stargazers_count: 0,
+    forks_count: 0,
+    topics: ['hostel', 'management', 'web']
+  },
+  {
+    name: 'Student_Performance_Predictor',
+    description: 'Machine learning project to predict student academic performance based on various factors.',
+    language: 'Python',
+    html_url: 'https://github.com/Ayushkumar418/Student_Performance_Predictor',
+    homepage: '',
+    stargazers_count: 0,
+    forks_count: 0,
+    topics: ['ml', 'python', 'prediction']
+  },
+  {
+    name: 'VotingSystem',
+    description: 'A secure online voting system with authentication and result management features.',
+    language: 'JavaScript',
+    html_url: 'https://github.com/Ayushkumar418/VotingSystem',
+    homepage: '',
+    stargazers_count: 0,
+    forks_count: 0,
+    topics: ['voting', 'web', 'security']
+  },
+  {
+    name: 'student-data-manager',
+    description: 'A student data management application for handling student records and information.',
+    language: 'Python',
+    html_url: 'https://github.com/Ayushkumar418/student-data-manager',
+    homepage: '',
+    stargazers_count: 0,
+    forks_count: 0,
+    topics: ['data', 'management', 'python']
+  }
+];
+
 // Language to icon mapping
 const languageIcons = {
   'JavaScript': 'bxl-javascript',
@@ -185,7 +250,7 @@ function getProjectIcon(repo) {
   if (name.includes('os') || name.includes('simulator')) return 'bx-chip';
   if (name.includes('codsoft')) return 'bx-code';
   if (name.includes('hostel') || name.includes('management')) return 'bx-building-house';
-  
+
 
   // Fallback to language icon
   const langIcon = languageIcons[repo.language] || languageIcons['default'];
@@ -225,27 +290,96 @@ function createProjectCard(repo) {
 
 // Fetch a single repository's details from GitHub API
 async function fetchRepoDetails(repoName) {
-  const response = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${repoName}`, {
-    headers: {
-      'Accept': 'application/vnd.github.mercy-preview+json'
-    }
-  });
+  try {
+    const response = await fetch(`https://api.github.com/repos/${GITHUB_USERNAME}/${repoName}`, {
+      headers: {
+        'Accept': 'application/vnd.github.mercy-preview+json'
+      }
+    });
 
-  if (!response.ok) {
-    console.warn(`Failed to fetch repo: ${repoName}`);
+    if (response.status === 403) {
+      console.error(`Rate limited or forbidden: ${repoName}`);
+      throw new Error('RATE_LIMITED');
+    }
+
+    if (response.status === 404) {
+      console.warn(`Repository not found: ${repoName}`);
+      return null;
+    }
+
+    if (!response.ok) {
+      console.warn(`Failed to fetch repo: ${repoName}, Status: ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json();
+    console.log(`Fetched: ${repoName}`, data.name);
+    return data;
+  } catch (error) {
+    if (error.message === 'RATE_LIMITED') {
+      throw error;
+    }
+    console.error(`Error fetching ${repoName}:`, error);
     return null;
   }
-
-  return await response.json();
 }
 
 // Fetch all projects from the MY_PROJECTS array
 async function fetchMyProjects() {
-  const fetchPromises = MY_PROJECTS.map(repoName => fetchRepoDetails(repoName));
-  const results = await Promise.all(fetchPromises);
+  const results = [];
 
-  // Filter out any failed fetches (null values)
-  return results.filter(repo => repo !== null);
+  for (const repoName of MY_PROJECTS) {
+    const repo = await fetchRepoDetails(repoName);
+    if (repo) {
+      results.push(repo);
+    }
+  }
+
+  return results;
+}
+
+// Cache key for localStorage
+const PROJECTS_CACHE_KEY = 'portfolio_projects_cache';
+const CACHE_TIMESTAMP_KEY = 'portfolio_projects_cache_time';
+
+// Save projects to localStorage cache
+function saveProjectsToCache(projects) {
+  try {
+    localStorage.setItem(PROJECTS_CACHE_KEY, JSON.stringify(projects));
+    localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+    console.log('Projects cached successfully!');
+  } catch (e) {
+    console.warn('Failed to cache projects:', e);
+  }
+}
+
+// Get projects from localStorage cache
+function getProjectsFromCache() {
+  try {
+    const cached = localStorage.getItem(PROJECTS_CACHE_KEY);
+    if (cached) {
+      const projects = JSON.parse(cached);
+      const timestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+      if (timestamp) {
+        const cacheAge = Date.now() - parseInt(timestamp);
+        const hoursOld = Math.round(cacheAge / (1000 * 60 * 60));
+        console.log(`Using cached projects (${hoursOld} hours old)`);
+      }
+      return projects;
+    }
+  } catch (e) {
+    console.warn('Failed to read cache:', e);
+  }
+  return null;
+}
+
+// Get fallback projects (from cache or hardcoded)
+function getFallbackProjects() {
+  const cached = getProjectsFromCache();
+  if (cached && cached.length > 0) {
+    return cached;
+  }
+  return FALLBACK_PROJECTS;
 }
 
 // Load GitHub projects
@@ -259,24 +393,9 @@ async function loadGitHubProjects() {
   gridEl.innerHTML = '';
   errorEl.style.display = 'none';
 
-  try {
-    const repos = await fetchMyProjects();
-    console.log('Loaded projects:', repos.length);
-
-    // Hide loading
-    loadingEl.style.display = 'none';
-
-    if (repos.length === 0) {
-      errorEl.innerHTML = `
-        <i class='bx bx-folder-open'></i>
-        <p>No projects found.</p>
-      `;
-      errorEl.style.display = 'flex';
-      return;
-    }
-
-    // Render projects with staggered animation
-    repos.forEach((repo, index) => {
+  // Helper function to render projects
+  function renderProjects(projects) {
+    projects.forEach((repo, index) => {
       const card = document.createElement('div');
       card.innerHTML = createProjectCard(repo);
       card.firstElementChild.style.opacity = '0';
@@ -293,11 +412,45 @@ async function loadGitHubProjects() {
         }
       }, index * 100);
     });
+  }
+
+  try {
+    console.log('Fetching projects from GitHub API...');
+    console.log('Projects to fetch:', MY_PROJECTS);
+
+    const repos = await fetchMyProjects();
+
+    // Hide loading
+    loadingEl.style.display = 'none';
+
+    if (repos.length > 0) {
+      console.log('Successfully loaded projects from API:', repos.length);
+
+      // Save to cache for future use (auto-update)
+      saveProjectsToCache(repos);
+
+      // Render the fresh data
+      renderProjects(repos);
+    } else {
+      // API returned no projects, use fallback
+      console.log('No projects from API, using fallback...');
+      const fallback = getFallbackProjects();
+      renderProjects(fallback);
+    }
 
   } catch (error) {
-    console.error('Error loading GitHub projects:', error);
+    console.error('API Error:', error.message);
+    console.log('Using cached/fallback project data...');
+
+    // Hide loading
     loadingEl.style.display = 'none';
-    errorEl.style.display = 'flex';
+
+    // Get best available fallback (cached > hardcoded)
+    const fallback = getFallbackProjects();
+    console.log('Fallback projects:', fallback.length);
+
+    // Render fallback projects
+    renderProjects(fallback);
   }
 }
 
@@ -315,23 +468,45 @@ document.addEventListener('DOMContentLoaded', function () {
   // Get all certificate images
   const certificateImages = document.querySelectorAll('.certificate-image');
 
+  // Open lightbox function
+  function openLightbox(imgSrc) {
+    lightbox.style.display = 'flex';
+    lightboxImg.src = imgSrc;
+    // Trigger reflow for animation
+    setTimeout(() => lightbox.classList.add('show'), 10);
+    document.body.style.overflow = 'hidden'; // Prevent scroll
+  }
+
+  // Close lightbox function
+  function closeLightbox() {
+    lightbox.classList.remove('show');
+    setTimeout(() => {
+      lightbox.style.display = 'none';
+      document.body.style.overflow = ''; // Restore scroll
+    }, 300);
+  }
+
   // Add click event to each certificate image
   certificateImages.forEach(img => {
     img.addEventListener('click', function () {
-      lightbox.style.display = 'flex';
-      lightboxImg.src = this.src;
+      openLightbox(this.src);
     });
   });
 
   // Close lightbox when clicking the close button
-  close.addEventListener('click', function () {
-    lightbox.style.display = 'none';
-  });
+  close.addEventListener('click', closeLightbox);
 
   // Close lightbox when clicking outside the image
   lightbox.addEventListener('click', function (e) {
     if (e.target === lightbox) {
-      lightbox.style.display = 'none';
+      closeLightbox();
+    }
+  });
+
+  // Close lightbox with Escape key
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && lightbox.style.display === 'flex') {
+      closeLightbox();
     }
   });
 

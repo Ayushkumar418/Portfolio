@@ -835,6 +835,7 @@ span {
   display: inline-flex;
   align-items: center;
   gap: 0.8rem;
+  color: var(--text-color);
 }
 
 .projects-cta .btn i {
@@ -890,7 +891,7 @@ span {
 
 .certificates {
   min-height: auto;
-  padding-bottom: 7rem;
+  padding: 5rem 9% 7rem;
   background: var(--second-bg-color);
 }
 
@@ -903,92 +904,145 @@ span {
 .certificates-row {
   display: flex;
   justify-content: center;
-  gap: 2rem;
+  gap: 3rem;
   flex-wrap: wrap;
+  padding: 2rem 0;
 }
 
 .certificates-row .certificate-box {
   position: relative;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   text-align: center;
-  justify-content: center;
+  justify-content: flex-start;
   color: var(--text-color);
+  max-width: 400px;
+  transition: transform 0.3s ease;
+}
+
+.certificates-row .certificate-box:hover {
+  transform: translateY(-5px);
+}
+
+.certificates-row .certificate-box .cer-about {
+  padding: 1rem 0;
 }
 
 .certificates-row .certificate-box .cer-about h3 {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   color: var(--text-color);
+  margin-bottom: 0.5rem;
 }
 
 .certificates-row .certificate-box .cer-about p {
-  font-size: 1.2rem;
-  color: var(--text-color);
+  font-size: 1.4rem;
+  color: rgba(237, 237, 237, 0.8);
 }
 
 .certificates-row .certificate-box .certificate-img {
-  transition: transform 0.5s;
-  border-radius: 0.9rem;
-  box-shadow: 0 0.2rem 0.6rem var(--bg-color);
-  margin: 3rem;
-  width: 400px;
-  height: 300px;
+  border-radius: 1rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.3);
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+  aspect-ratio: 4/3;
   border: 0.2rem solid var(--main-color);
-  object-fit: cover;
   overflow: hidden;
+  transition: all 0.4s ease;
+}
+
+.certificates-row .certificate-box .certificate-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
 }
 
 .certificates-row .certificate-box .certificate-img:hover {
-  transform: scale(1.09);
-  box-shadow: 0 0.4rem 0.6rem #0097ff;
+  box-shadow: 0 0.8rem 2rem rgba(0, 171, 240, 0.4);
+  border-color: #0ef;
+}
+
+.certificates-row .certificate-box .certificate-img:hover img {
+  transform: scale(1.05);
 }
 
 .certificate-image {
   cursor: pointer;
-  transition: 0.3s;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
+/* Lightbox - Improved */
 .lightbox {
   display: none;
   position: fixed;
-  z-index: 999;
+  z-index: 9999;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.9);
-  transform: scale(1.5);
+  background-color: rgba(0, 0, 0, 0.95);
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.lightbox.show {
+  opacity: 1;
 }
 
 .lightbox img {
   max-width: 90%;
-  max-height: 90%;
-  margin: auto;
-  display: block;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  max-height: 85vh;
+  object-fit: contain;
   border: 3px solid var(--main-color);
-  border-radius: 10px;
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-  transition: all 0.3s ease;
+  border-radius: 1rem;
+  box-shadow: 0 0 30px rgba(0, 171, 240, 0.5);
+  animation: zoomIn 0.3s ease;
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .lightbox img:hover {
-  box-shadow: 0 0 30px rgba(0, 255, 255, 0.8);
-  transform: translate(-50%, -50%) scale(1.02);
+  box-shadow: 0 0 40px rgba(0, 171, 240, 0.7);
 }
 
 .close {
-  position: absolute;
-  top: 10rem;
-  right: 26rem;
-  color: #f1f1f1;
-  font-size: 40px;
+  position: fixed;
+  top: 2rem;
+  right: 3rem;
+  color: var(--text-color);
+  font-size: 4rem;
   font-weight: bold;
   cursor: pointer;
+  z-index: 10000;
+  width: 5rem;
+  height: 5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+.close:hover {
+  background: var(--main-color);
+  color: var(--bg-color);
+  transform: rotate(90deg);
 }
 
 .contact {
@@ -1423,13 +1477,16 @@ span {
     transition-delay: 0.25s;
   }
 
-  .close {
-    top: 13rem;
-    right: 9rem;
+  .certificates {
+    padding: 0 4% 5rem;
   }
 
-  .lightbox {
-    transform: scale(1.2);
+  .certificates-row {
+    gap: 2rem;
+  }
+
+  .certificates-row .certificate-box {
+    max-width: 350px;
   }
 
   .projects-grid {
@@ -1445,7 +1502,6 @@ span {
 @media (max-width: 520px) {
   html {
     font-size: 55%;
-    /* Increased from 50% */
   }
 
   .home-content h1 {
@@ -1462,36 +1518,22 @@ span {
     height: 38px;
   }
 
-  .certificates h2 {
-    margin-top: 10rem;
-  }
-
-  .certificates-row .certificate-box,
-  .certificates-row .certificate-box .certificate-img {
-    transform: scale(0.9);
-    margin-top: -1rem;
+  .certificates {
+    padding: 0 4% 4rem;
   }
 
   .certificates-row {
-    gap: -1rem;
+    gap: 1.5rem;
+    flex-direction: column;
+    align-items: center;
   }
 
-  .certificate-box .cer-about {
-    margin-top: -1rem;
+  .certificates-row .certificate-box {
+    max-width: 90%;
   }
 
-  .certificates-row .certificate-box .certificate-img:hover {
-    transform: scale(0.95);
-    box-shadow: 0 0.4rem 0.6rem #0097ff;
-  }
-
-  .close {
-    top: 13rem;
-    right: 6rem;
-  }
-
-  .lightbox {
-    transform: scale(1.1);
+  .certificates-row .certificate-box .certificate-img {
+    max-width: 100%;
   }
 }
 
@@ -1508,38 +1550,26 @@ span {
     width: 100%;
   }
 
-  .certificates-row .certificate-box,
-  .certificates-row .certificate-box .certificate-img {
-    transform: scale(0.78);
-    margin-top: -1rem;
-    margin-left: -5rem;
-  }
-
   .certificates {
-    padding: 0;
+    padding: 0 3% 3rem;
   }
 
-  .certificates-row {
-    gap: 0;
-    margin-right: -1rem;
-  }
-
-  .certificate-box .cer-about {
-    margin-top: 0;
-  }
-
-  .certificates-row .certificate-box .certificate-img {
-    transform: scale(0.89);
-    margin: -2rem;
+  .certificates-row .certificate-box {
+    max-width: 100%;
+    width: 100%;
   }
 
   .close {
-    top: 13rem;
-    right: 3rem;
+    top: 1.5rem;
+    right: 1.5rem;
+    width: 4rem;
+    height: 4rem;
+    font-size: 3rem;
   }
 
-  .lightbox {
-    transform: scale(1);
+  .lightbox img {
+    max-width: 95%;
+    max-height: 80vh;
   }
 
   .footer {
@@ -1553,13 +1583,16 @@ span {
 }
 
 @media (max-width: 399px) {
-  .certificates-row .certificate-box .certificate-img {
-    transform: scale(0.8);
-    margin: -1.2rem;
+  .certificates {
+    padding: 0 2% 2rem;
   }
 
-  .certificate-box .cer-about {
-    margin-top: 2rem;
+  .certificates-row .certificate-box .cer-about h3 {
+    font-size: 1.5rem;
+  }
+
+  .certificates-row .certificate-box .cer-about p {
+    font-size: 1.2rem;
   }
 }
 
