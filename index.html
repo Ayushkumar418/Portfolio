@@ -34,6 +34,7 @@
             <a href="#about">About</a>
             <a href="#education">Education</a>
             <a href="#skills">Skills</a>
+            <a href="#projects">Projects</a>
             <a href="#certificates">Certificates</a>
             <a href="#contact">Contact</a>
 
@@ -242,6 +243,37 @@
 
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- Projects section design -->
+    <section class="projects" id="projects">
+        <h2 class="heading">My <span>Projects</span></h2>
+
+        <div class="projects-container">
+            <!-- Loading State -->
+            <div class="projects-loading" id="projects-loading">
+                <i class='bx bx-loader-alt bx-spin'></i>
+                <p>Loading projects from GitHub...</p>
+            </div>
+
+            <!-- Projects Grid -->
+            <div class="projects-grid" id="projects-grid">
+                <!-- Projects will be dynamically loaded here -->
+            </div>
+
+            <!-- Error State -->
+            <div class="projects-error" id="projects-error" style="display: none;">
+                <i class='bx bx-error-circle'></i>
+                <p>Failed to load projects. Please try again later.</p>
+                <button class="btn" onclick="loadGitHubProjects()">Retry</button>
+            </div>
+        </div>
+
+        <div class="projects-cta">
+            <a href="https://github.com/Ayushkumar418?tab=repositories" target="_blank" class="btn">
+                <i class='bx bxl-github'></i> View All on GitHub
+            </a>
         </div>
     </section>
 

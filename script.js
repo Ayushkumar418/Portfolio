@@ -119,113 +119,326 @@ function changeText() {
 // Start the animation
 animateText(titles[0]);
 
-// Lightbox functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const lightbox = document.getElementById('lightbox');
-    const lightboxImg = document.getElementById('lightbox-img');
-    const close = document.querySelector('.close');
-    
-    // Get all certificate images
-    const certificateImages = document.querySelectorAll('.certificate-image');
-    
-    // Add click event to each certificate image
-    certificateImages.forEach(img => {
-        img.addEventListener('click', function() {
-            lightbox.style.display = 'flex';
-            lightboxImg.src = this.src;
-        });
-    });
-    
-    // Close lightbox when clicking the close button
-    close.addEventListener('click', function() {
-        lightbox.style.display = 'none';
-    });
-    
-    // Close lightbox when clicking outside the image
-    lightbox.addEventListener('click', function(e) {
-        if (e.target === lightbox) {
-            lightbox.style.display = 'none';
-        }
-    });
+// GitHub Projects Integration - Fetches PINNED repositories
+const GITHUB_USERNAME = 'Ayushkumar418';
 
-    // Attach sendEmail to the form's submit event
-    const contactForm = document.querySelector('section.contact form');
-    if (contactForm) {
-        contactForm.addEventListener('submit', sendEmail);
+// Language to icon mapping
+const languageIcons = {
+  'JavaScript': 'bxl-javascript',
+  'HTML': 'bxl-html5',
+  'CSS': 'bxl-css3',
+  'Python': 'bxl-python',
+  'Java': 'bxl-java',
+  'TypeScript': 'bxl-typescript',
+  'C++': 'bxs-file-cpp',
+  'C': 'bxs-file-c',
+  'Shell': 'bx-terminal',
+  'default': 'bx-code-alt'
+};
+
+// Get language class for color dot
+function getLanguageClass(language) {
+  if (!language) return 'lang-default';
+  const lang = language.toLowerCase().replace(/\+/g, 'p').replace(/#/g, 'sharp');
+  return `lang-${lang}`;
+}
+
+// Get project icon based on language or name
+function getProjectIcon(repo) {
+  const name = repo.name.toLowerCase();
+
+  // Check for specific project types
+  if (name.includes('portfolio')) return 'bx-user';
+  if (name.includes('weather')) return 'bx-cloud';
+  if (name.includes('calculator')) return 'bx-calculator';
+  if (name.includes('game') || name.includes('quiz')) return 'bx-game';
+  if (name.includes('chat') || name.includes('message')) return 'bx-message-rounded-dots';
+  if (name.includes('api') || name.includes('backend')) return 'bx-server';
+  if (name.includes('blog') || name.includes('post')) return 'bx-edit';
+  if (name.includes('shop') || name.includes('store') || name.includes('ecommerce')) return 'bx-cart';
+  if (name.includes('music') || name.includes('audio')) return 'bx-music';
+  if (name.includes('video') || name.includes('youtube')) return 'bx-video';
+  if (name.includes('book') || name.includes('library')) return 'bx-book';
+  if (name.includes('todo') || name.includes('task')) return 'bx-task';
+  if (name.includes('dashboard') || name.includes('admin')) return 'bx-grid-alt';
+  if (name.includes('simulator') || name.includes('os')) return 'bx-chip';
+
+  // Fallback to language icon
+  const langIcon = languageIcons[repo.language] || languageIcons['default'];
+  return langIcon;
+}
+
+// Create project card HTML
+function createProjectCard(repo) {
+  const icon = getProjectIcon(repo);
+  const description = repo.description || 'No description available';
+  const language = repo.language || 'Unknown';
+  const langClass = getLanguageClass(repo.language);
+
+  return `
+        <div class="project-card">
+            <div class="project-header">
+                <i class='bx ${icon} project-icon'></i>
+                <div class="project-links">
+                    ${repo.homepage ? `<a href="${repo.homepage}" target="_blank" title="Live Demo"><i class='bx bx-link-external'></i></a>` : ''}
+                    <a href="${repo.html_url}" target="_blank" title="View Code"><i class='bx bxl-github'></i></a>
+                </div>
+            </div>
+            <h3 class="project-title">${repo.name.replace(/-|_/g, ' ')}</h3>
+            <p class="project-description">${description}</p>
+            <div class="project-tech">
+                <span>${language}</span>
+                ${repo.topics && repo.topics.length > 0 ? repo.topics.slice(0, 3).map(topic => `<span>${topic}</span>`).join('') : ''}
+            </div>
+            <div class="project-stats">
+                <span class="stars"><i class='bx bxs-star'></i> ${repo.stargazers_count}</span>
+                <span class="forks"><i class='bx bx-git-repo-forked'></i> ${repo.forks_count}</span>
+                <span class="language"><span class="language-dot ${langClass}"></span> ${language}</span>
+            </div>
+        </div>
+    `;
+}
+
+// Fetch pinned repositories using GitHub GraphQL API via public proxy
+async function fetchPinnedRepos() {
+  // List of your preferred/pinned repos - UPDATE THIS LIST to match your GitHub pins!
+  const PREFERRED_REPOS = [
+    'Hostel-Management-System',
+    'OS_SIMULATOR-Web_App',
+    'SecBootKIVS',
+    'Student_Performance_Predictor',
+    'VotingSystem',
+    'student-data-manager'
+  ];
+
+  // Fetch all repos and filter to get the preferred ones
+  const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos?per_page=100`, {
+    headers: {
+      'Accept': 'application/vnd.github.mercy-preview+json'
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch repositories');
+  }
+
+  const allRepos = await response.json();
+
+  // Filter to only include preferred repos, maintaining the order from PREFERRED_REPOS
+  const pinnedRepos = PREFERRED_REPOS
+    .map(repoName => allRepos.find(repo => repo.name === repoName))
+    .filter(repo => repo !== undefined);
+
+  return pinnedRepos;
+}
+
+// Fallback: Fetch regular repos if pinned repos fail
+async function fetchRegularRepos() {
+  const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/repos`, {
+    headers: {
+      'Accept': 'application/vnd.github.mercy-preview+json'
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch repositories');
+  }
+
+  const repos = await response.json();
+
+  // Sort by stars and updated date, filter out forks
+  return repos
+    .filter(repo => !repo.fork)
+    .sort((a, b) => {
+      if (b.stargazers_count !== a.stargazers_count) {
+        return b.stargazers_count - a.stargazers_count;
+      }
+      return new Date(b.updated_at) - new Date(a.updated_at);
+    })
+    .slice(0, 6);
+}
+
+// Load GitHub projects (prioritize pinned repos)
+async function loadGitHubProjects() {
+  const loadingEl = document.getElementById('projects-loading');
+  const gridEl = document.getElementById('projects-grid');
+  const errorEl = document.getElementById('projects-error');
+
+  // Show loading state
+  loadingEl.style.display = 'flex';
+  gridEl.innerHTML = '';
+  errorEl.style.display = 'none';
+
+  try {
+    let repos;
+
+    // Try to fetch pinned repos first
+    try {
+      repos = await fetchPinnedRepos();
+      console.log('Loaded pinned repositories:', repos.length);
+
+      // If no pinned repos, fall back to regular repos
+      if (repos.length === 0) {
+        console.log('No pinned repos found, falling back to regular repos');
+        repos = await fetchRegularRepos();
+        console.log('Loaded regular repositories:', repos.length);
+      }
+    } catch (pinnedError) {
+      console.warn('Failed to fetch pinned repos, falling back to regular repos:', pinnedError);
+      repos = await fetchRegularRepos();
+      console.log('Loaded regular repositories:', repos.length);
     }
 
-    // Real-time validation
-    const debounce = (func, wait) => {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    };
+    // Hide loading
+    loadingEl.style.display = 'none';
 
-    const inputs = {
-        name: {
-            element: document.getElementById('name'),
-            validate: (value) => value.trim().length >= 2 || 'Name must be at least 2 characters'
-        },
-        email: {
-            element: document.getElementById('email'),
-            validate: (value) => {
-                if (!value) return 'Email is required';
-                return validateEmail(value) || 'Please enter a valid email address';
-            }
-        },
-        number: {
-            element: document.getElementById('number'),
-            validate: (value) => {
-                if (!value) return 'Phone number is required';
-                return validatePhone(value) || 'Please enter a valid 10-digit number';
-            }
-        },
-        subject: {
-            element: document.getElementById('subject'),
-            validate: (value) => value.trim().length >= 3 || 'Subject must be at least 3 characters'
-        },
-        message: {
-            element: document.getElementById('Message'),
-            validate: (value) => value.trim().length >= 10 || 'Message must be at least 10 characters'
+    if (repos.length === 0) {
+      errorEl.innerHTML = `
+                <i class='bx bx-folder-open'></i>
+                <p>No projects found.</p>
+            `;
+      errorEl.style.display = 'flex';
+      return;
+    }
+
+    // Render projects with staggered animation
+    repos.forEach((repo, index) => {
+      const card = document.createElement('div');
+      card.innerHTML = createProjectCard(repo);
+      card.firstElementChild.style.opacity = '0';
+      card.firstElementChild.style.transform = 'translateY(20px)';
+      gridEl.appendChild(card.firstElementChild);
+
+      // Animate in
+      setTimeout(() => {
+        const addedCard = gridEl.children[index];
+        if (addedCard) {
+          addedCard.style.transition = 'all 0.5s ease';
+          addedCard.style.opacity = '1';
+          addedCard.style.transform = 'translateY(0)';
         }
-    };
-
-    // Add real-time validation with debounce
-    Object.keys(inputs).forEach(key => {
-        const input = inputs[key];
-        const validateWithDebounce = debounce((element) => {
-            const result = input.validate(element.value);
-            if (result === true) {
-                removeError(element);
-                element.classList.add('valid');
-            } else {
-                showError(element, result);
-                element.classList.remove('valid');
-            }
-        }, 500); // 500ms debounce delay
-
-        input.element.addEventListener('input', function() {
-            validateWithDebounce(this);
-        });
-
-        // Validate on blur immediately
-        input.element.addEventListener('blur', function() {
-            const result = input.validate(this.value);
-            if (result === true) {
-                removeError(this);
-                this.classList.add('valid');
-            } else {
-                showError(this, result);
-                this.classList.remove('valid');
-            }
-        });
+      }, index * 100);
     });
+
+  } catch (error) {
+    console.error('Error loading GitHub projects:', error);
+    loadingEl.style.display = 'none';
+    errorEl.style.display = 'flex';
+  }
+}
+
+// Load projects when DOM is ready
+document.addEventListener('DOMContentLoaded', function () {
+  loadGitHubProjects();
+});
+
+// Lightbox functionality
+document.addEventListener('DOMContentLoaded', function () {
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  const close = document.querySelector('.close');
+
+  // Get all certificate images
+  const certificateImages = document.querySelectorAll('.certificate-image');
+
+  // Add click event to each certificate image
+  certificateImages.forEach(img => {
+    img.addEventListener('click', function () {
+      lightbox.style.display = 'flex';
+      lightboxImg.src = this.src;
+    });
+  });
+
+  // Close lightbox when clicking the close button
+  close.addEventListener('click', function () {
+    lightbox.style.display = 'none';
+  });
+
+  // Close lightbox when clicking outside the image
+  lightbox.addEventListener('click', function (e) {
+    if (e.target === lightbox) {
+      lightbox.style.display = 'none';
+    }
+  });
+
+  // Attach sendEmail to the form's submit event
+  const contactForm = document.querySelector('section.contact form');
+  if (contactForm) {
+    contactForm.addEventListener('submit', sendEmail);
+  }
+
+  // Real-time validation
+  const debounce = (func, wait) => {
+    let timeout;
+    return function executedFunction(...args) {
+      const later = () => {
+        clearTimeout(timeout);
+        func(...args);
+      };
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+    };
+  };
+
+  const inputs = {
+    name: {
+      element: document.getElementById('name'),
+      validate: (value) => value.trim().length >= 2 || 'Name must be at least 2 characters'
+    },
+    email: {
+      element: document.getElementById('email'),
+      validate: (value) => {
+        if (!value) return 'Email is required';
+        return validateEmail(value) || 'Please enter a valid email address';
+      }
+    },
+    number: {
+      element: document.getElementById('number'),
+      validate: (value) => {
+        if (!value) return 'Phone number is required';
+        return validatePhone(value) || 'Please enter a valid 10-digit number';
+      }
+    },
+    subject: {
+      element: document.getElementById('subject'),
+      validate: (value) => value.trim().length >= 3 || 'Subject must be at least 3 characters'
+    },
+    message: {
+      element: document.getElementById('Message'),
+      validate: (value) => value.trim().length >= 10 || 'Message must be at least 10 characters'
+    }
+  };
+
+  // Add real-time validation with debounce
+  Object.keys(inputs).forEach(key => {
+    const input = inputs[key];
+    const validateWithDebounce = debounce((element) => {
+      const result = input.validate(element.value);
+      if (result === true) {
+        removeError(element);
+        element.classList.add('valid');
+      } else {
+        showError(element, result);
+        element.classList.remove('valid');
+      }
+    }, 500); // 500ms debounce delay
+
+    input.element.addEventListener('input', function () {
+      validateWithDebounce(this);
+    });
+
+    // Validate on blur immediately
+    input.element.addEventListener('blur', function () {
+      const result = input.validate(this.value);
+      if (result === true) {
+        removeError(this);
+        this.classList.add('valid');
+      } else {
+        showError(this, result);
+        this.classList.remove('valid');
+      }
+    });
+  });
 });
 
 // Form validation functions
@@ -250,17 +463,17 @@ function removeError(input) {
 }
 
 function validateEmail(email) {
-    // More comprehensive email validation
-    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-    const isValid = emailRegex.test(email);
-    return isValid;
+  // More comprehensive email validation
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+  const isValid = emailRegex.test(email);
+  return isValid;
 }
 
 function validatePhone(phone) {
-    // Allow only numbers and exact length of 10
-    const phoneRegex = /^\d{10}$/;
-    const isValid = phoneRegex.test(phone.replace(/\D/g, ''));
-    return isValid;
+  // Allow only numbers and exact length of 10
+  const phoneRegex = /^\d{10}$/;
+  const isValid = phoneRegex.test(phone.replace(/\D/g, ''));
+  return isValid;
 }
 
 function validateForm() {
@@ -315,69 +528,69 @@ function validateForm() {
 }
 
 function showPopup(type, title, message) {
-    // Create popup element
-    const popup = document.createElement('div');
-    popup.className = `popup ${type}`;
-    popup.innerHTML = `
+  // Create popup element
+  const popup = document.createElement('div');
+  popup.className = `popup ${type}`;
+  popup.innerHTML = `
         <i class='bx ${type === 'success' ? 'bxs-check-circle' : 'bxs-x-circle'}'></i>
         <h2>${title}</h2>
         <p>${message}</p>
         <button onclick="this.parentElement.remove()">OK</button>
     `;
-    document.body.appendChild(popup);
-    
-    // Show popup with animation
-    setTimeout(() => popup.classList.add('show'), 10);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        popup.classList.remove('show');
-        setTimeout(() => popup.remove(), 300);
-    }, 5000);
+  document.body.appendChild(popup);
+
+  // Show popup with animation
+  setTimeout(() => popup.classList.add('show'), 10);
+
+  // Auto remove after 5 seconds
+  setTimeout(() => {
+    popup.classList.remove('show');
+    setTimeout(() => popup.remove(), 300);
+  }, 5000);
 }
 
 function sendEmail(event) {
-    if (event) event.preventDefault();
+  if (event) event.preventDefault();
 
-    // Validate form before sending
-    if (!validateForm()) {
-        return;
-    }
+  // Validate form before sending
+  if (!validateForm()) {
+    return;
+  }
 
-    const submitBtn = document.getElementById("submit");
-    const originalText = submitBtn.textContent;
-    
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Sending...";
+  const submitBtn = document.getElementById("submit");
+  const originalText = submitBtn.textContent;
 
-    var params = {
-        name: document.getElementById("name").value.trim(),
-        email: document.getElementById("email").value.trim(),
-        number: document.getElementById("number").value.trim(),
-        subject: document.getElementById("subject").value.trim(),
-        message: document.getElementById("Message").value.trim(),
-    };
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Sending...";
 
-    const serviceID = "service_5h6hpmr";
-    const templateID = "template_b3y89oe";
+  var params = {
+    name: document.getElementById("name").value.trim(),
+    email: document.getElementById("email").value.trim(),
+    number: document.getElementById("number").value.trim(),
+    subject: document.getElementById("subject").value.trim(),
+    message: document.getElementById("Message").value.trim(),
+  };
 
-    emailjs.send(serviceID, templateID, params)
-        .then((res) => {
-            // Clear all fields
-            document.getElementById("name").value = "";
-            document.getElementById("email").value = "";
-            document.getElementById("number").value = "";
-            document.getElementById("subject").value = "";
-            document.getElementById("Message").value = "";
-            showPopup('success', 'Success!', 'Your message has been sent successfully!');
-        })
-        .catch((err) => {
-            console.log(err);
-            showPopup('error', 'Error!', 'Failed to send message. Please try again later.');
-        })
-        .finally(() => {
-            submitBtn.disabled = false;
-            submitBtn.textContent = originalText;
-            submitBtn.classList.remove("sending");
-        });
+  const serviceID = "service_5h6hpmr";
+  const templateID = "template_b3y89oe";
+
+  emailjs.send(serviceID, templateID, params)
+    .then((res) => {
+      // Clear all fields
+      document.getElementById("name").value = "";
+      document.getElementById("email").value = "";
+      document.getElementById("number").value = "";
+      document.getElementById("subject").value = "";
+      document.getElementById("Message").value = "";
+      showPopup('success', 'Success!', 'Your message has been sent successfully!');
+    })
+    .catch((err) => {
+      console.log(err);
+      showPopup('error', 'Error!', 'Failed to send message. Please try again later.');
+    })
+    .finally(() => {
+      submitBtn.disabled = false;
+      submitBtn.textContent = originalText;
+      submitBtn.classList.remove("sending");
+    });
 }
